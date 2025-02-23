@@ -5,8 +5,10 @@ import 'screens/login_screen.dart'; //Importa la pantalla de login
 import 'screens/welcome_screen.dart';
 import 'screens/nueva_cuenta_screen.dart'; 
 import 'screens/mi_cuenta.dart';
-
-void main() {
+import 'package:localstorage/localstorage.dart';
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await initLocalStorage();
   runApp(MyApp());
 }
 
@@ -18,7 +20,7 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         primarySwatch: Colors.blue,
       ),
-      home: NuevaCuentaScreen(), // Pantalla de carga inicial
+      home: LoginScreen(), // Pantalla de carga inicial
       routes: {
         '/home': (context) => HomeScreen(), // Pantalla principal
         '/login': (context) => LoginScreen(),

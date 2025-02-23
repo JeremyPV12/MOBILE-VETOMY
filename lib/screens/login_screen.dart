@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:vetomymobile/data/usecase/authentication-usecase-imp.dart';
+import 'package:vetomymobile/domain/auth/models/user.dart';
+import 'package:vetomymobile/domain/auth/models/login-request.dart';
 import 'welcome_screen.dart'; // Importa la nueva pantalla
 
 class LoginScreen extends StatefulWidget {
@@ -8,6 +11,8 @@ class LoginScreen extends StatefulWidget {
 
 class _LoginScreenState extends State<LoginScreen> {
   bool _isPasswordVisible = false;
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
   @override
   Widget build(BuildContext context) {
@@ -72,12 +77,7 @@ class _LoginScreenState extends State<LoginScreen> {
               _buildTextField("Contraseña", true),
               SizedBox(height: 20),
               ElevatedButton(
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(builder: (context) => WelcomeScreen()),
-                  );
-                },
+                onPressed: () => login(context),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.blue,
                   padding: EdgeInsets.symmetric(vertical: 20, horizontal: 100),
@@ -135,6 +135,7 @@ class _LoginScreenState extends State<LoginScreen> {
 
   Widget _buildTextField(String hintText, bool isPassword) {
     return TextField(
+      controller: isPassword ? _passwordController : _emailController,
       obscureText: isPassword && !_isPasswordVisible,
       decoration: InputDecoration(
         hintText: hintText,
@@ -177,5 +178,36 @@ class _LoginScreenState extends State<LoginScreen> {
         ),
       ),
     );
+  }
+
+  void login(BuildContext context) {
+    AuthenticationUsecaseImpl _auth = AuthenticationUsecaseImpl();
+    LoginRequest reqData = LoginRequest(
+      mail: _emailController.text,
+      password: _passwordController.text,
+    );
+
+    print(reqData);
+
+    _auth.login(reqData).then((profile) {
+      print("${profile.name} ${profile.lastName} -- ${profile.rol!.name}");
+
+      SnackBar snackBar = SnackBar(
+        content: Text("¡Login exitoso!"),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(builder: (context) => WelcomeScreen()),
+      );
+    }).catchError((err) {
+      print(err);
+      SnackBar snackBar = SnackBar(
+        content: Text(
+            "No se pudo iniciar sesión, verifica tus credenciales e inténtalo nuevamente"),
+      );
+      ScaffoldMessenger.of(context).showSnackBar(snackBar);
+    });
   }
 }
